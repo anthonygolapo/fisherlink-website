@@ -1,0 +1,168 @@
+/* Sidebar styling */
+#sidebar {
+    position: absolute;
+    top: 93px;
+
+    right: -350px;
+    /* Sidebar starts off-screen */
+    width: 300px;
+   
+    
+    /* 0.6 = 60% opacity */
+    color: white;
+    overflow-y: auto;
+    transition: right 0.3s ease;
+    z-index: 1500;
+    
+   
+    /* Above map */
+}
+
+#sidebar-container {
+    display: flex;
+    flex-direction: column;
+    /* stack elements vertically */
+    justify-content: flex-start;
+    /* start content from the top */
+    background-color: #0f1e27;
+    gap: 10px;
+    height: 600px;
+    padding: 18px;
+    padding-top: 30px;
+
+}
+
+.sidebar-group{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+}
+
+.button-sidebar button{
+    gap: 8px;
+}
+.sidebar{
+    height: 30px;
+    width: 50px;
+}
+
+
+
+
+#sidebar.open {
+    right: 0;
+    /* Sidebar comes into view */
+}
+
+#sidebar .close-btn {
+    position: absolute;
+    top: 30px;
+    /* Adjust as needed */
+    right: 35px;
+    /* Pushes it to the right corner */
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+}
+
+#sidebar ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+#sidebar ul li {
+    padding: 8px;
+    border-bottom: 1px solid #444;
+    cursor: pointer;
+}
+
+
+
+#senderList {
+    min-height: 260px;
+    max-height: 260px;
+    overflow-y: auto;
+    /* Enable vertical scrolling */
+    scrollbar-width: thin;
+    /* Optional: Makes scrollbar less intrusive */
+}
+
+.count-div {
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+
+#sidebar ul li:hover {
+    background-color: #555;
+}
+
+#sidebar h3 {
+    font-size: 30px;
+    /* Adjust this size to make the word bigger or smaller */
+    font-weight: bold;
+    margin-bottom: 15px;
+    /* Optional: Adds space below the heading */
+}
+
+/* Highlight sender name */
+.highlight {
+    font-weight: bold;
+    color: rgb(148, 248, 255);
+    /* Darker background */
+    padding: 0px;
+    border-radius: 5px;
+}
+
+.button-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.button-sidebar button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background-color: transparent;
+    gap: 12px;
+    /* Adjust height */
+    padding: 10px;
+    text-align: left;
+    font-size: 16px;
+    font-weight: bold;
+    color: rgb(255, 248, 248);
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.button-sidebar button:hover {
+    background: #0f1d26;
+        box-shadow:
+            inset 0 3px 6px rgba(0, 0, 0, 0.5),
+            0 2px 0 #313c43;
+}
+
+.line-sidebar {
+    display: flex;
+    width: 100%;
+    height: 5px;
+    background: #0f1d26;
+        box-shadow:
+            inset 0 3px 6px rgba(0, 0, 0, 0.5),
+            0 2px 0 #313c43;
+    margin: 10px 0px;  
+}
+
+
+
+.button-sidebar button img {
+    width: 24px;
+    /* adjust icon size */
+    height: 24px;
+}
