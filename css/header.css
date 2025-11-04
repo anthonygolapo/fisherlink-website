@@ -133,7 +133,7 @@
 @media (max-width: 600px) {
     #controls {
             flex-direction: column;
-            padding: 20px;
+            padding: 15px;
             /* top/bottom =10px, left/right=4% */
             box-sizing: border-box;
             /* ensures padding fits inside width */
@@ -160,6 +160,12 @@
     .search-input {
         width: 100%;
     }
+
+    .search-input input{
+        font-size: 12px;
+    }
+
+
 
     #viewAllFishermen {
         display: none;
@@ -197,7 +203,7 @@
     }
 
     .search-container-main {
-        width: 90%;
+        width: 100%;
         margin-left: 0;
         justify-content: center;
         gap: 10px;
@@ -208,7 +214,5 @@
         justify-content: space-around;
     }
 
-    .View-Btn {
-        width: 180px;
-    }
+    
 }
