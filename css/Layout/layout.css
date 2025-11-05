@@ -9,9 +9,8 @@
 .filter-group input{
    
     padding: 6px 10px;
-        
         font-size: 14px;
-     
+
         background: transparent;
         /* subtle translucent background */
         border: none;
@@ -23,7 +22,6 @@
 /* Adjust filter input sizes */
 .filter-group{
     padding: 6px 15px;
-    height: 35px;
     font-size: 14px;
     border-radius: 12px;
     background: rgba(10, 20, 26, 0.6);
@@ -60,6 +58,7 @@
     margin-top: 25px;
     justify-content: space-between;
     height: 45px;
+    
 }
 
 .div-box-sub {
@@ -78,3 +77,32 @@
     align-items: center;
 }
 
+
+
+
+
+@media (max-width: 600px) {
+
+    .div-box {
+            display: flex;
+            flex-direction: column;
+            margin-top: 2px;
+            justify-content: space-between;
+            height: 45px;
+        }
+
+    .filter-div {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .div-box-sub {
+        display: flex;
+        gap: 18px;
+        height: 40px;
+
+    }
+}
