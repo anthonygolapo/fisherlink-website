@@ -31,7 +31,7 @@
     <div id="controls">
         <div class="search-container-main">
             <!-- Callsign Search Pair -->
-            <div class="search-container-sub">
+            <div class="search-container-sub header">
                 <div class="search-input">
                     <input type="text" id="searchSender" placeholder="Enter Callsign" class="search">
                     <img src="search.png" alt="" id="searchIcon" width="15px" height="15px">
@@ -45,7 +45,7 @@
             </div>
             <!-- Sidebar Button -->
             <div class="button View-Btn">
-                <img src="plot.png" alt="View All" class="btn-icon" onclick="toggleSidebar()">
+                <img src="sidebar.png" alt="View All" class="btn-icon" onclick="toggleSidebar()">
                 <button id="viewAllFishermen" onclick="toggleSidebar()" >View All Fishermen</button>
             </div>
         </div>
@@ -113,8 +113,10 @@
             <div class="modal-content">
                 <div class="close-div">    
                     <div class="title-modal">
-                        Monthly SOS Report
-                        <img src="logo-2.png" alt="logo" width="70" height="auto">
+                        <div class="title">
+                            Monthly SOS Report
+                        </div>
+                        <img src="logo-2.png" alt="logo" width="70" height="auto" class="logo">
                     </div>
         
                     <span class="close-modal" onclick="closeSafeReportModal()">
@@ -141,11 +143,11 @@
                         </div>
                     </div>
                     
-                    <div class="div-box-sub">
-                        <div class="filter-div">
+                    <div class="div-box-sub div-box-sub-SOS">
+
+                        <div style="display: flex; justify-content: space-between; gap: 12px;">
                             <label style="font-size: 500; color: #DCDCDC;">From:</label>
                             <div class="filter-group">
-                               
                                 <select id="fromYearInput" class="yearInput"></select>
                                 <select id="fromMonthDropdown" class="dropdown">
                                     <option value="">All Months</option>
@@ -162,14 +164,12 @@
                                     <option>November</option>
                                     <option>December</option>
                                 </select>
-                            </div>   
+                            </div>
                         </div>
 
-                        
-                        <div class="filter-div">
+                        <div style="display: flex; justify-content: space-between; gap: 12px;">
                             <label style="font-size: 500; color: #DCDCDC;">To:</label>
                             <div class="filter-group">
-                                
                                 <select id="toYearInput" class="yearInput"></select>
                                 <select id="toMonthDropdown" class="dropdown">
                                     <option value="">All Months</option>
@@ -187,8 +187,6 @@
                                     <option>December</option>
                                 </select>
                             </div>
-                        
-                            
                         </div>
                     </div>
 
@@ -271,7 +269,7 @@
                             </button>
                         </div>-->
 
-                        <div class="button Messag-Details-ClearFilter">
+                        <div class="button clear">
                             <button onclick="clearSenderFilter()">
                                 Clear Filter
                                 <img src="eraser.png" alt="Filter Icon" width="25" height="25">
@@ -329,8 +327,10 @@
 
             <div class="close-div">
                 <div class="title-modal">
-                    Fishermen History
-                    <img src="logo-2.png" alt="logo" width="70" height="auto">
+                    <div class="title">
+                        Fishermen History
+                    </div>
+                    <img src="logo-2.png" alt="logo" width="70" height="auto" class="logo">
                 </div>
 
                 
@@ -360,27 +360,32 @@
                         <button id="clearPlotButton" onclick="clearPlot()">
                             Clear
                             <img src="eraser.png" alt="Filter Icon" width="25" height="25">
-                        </button>
-                        
+                        </button>  
                     </div>
                 </div>
 
                 <!-- Date & Time Filters -->
                 <div class="filter-div">
-                    <label for="startDate" class="input-label" style="font-size: 500; color: #DCDCDC;">From:</label>
-                    <div class="filter-group">
+                    <div style="display:flex; flex-direction: row; align-items: center; gap: 5px; justify-content: space-between; width: 100%;">
+                        <label for="startDate" class="input-label" style="font-size: 500; color: #DCDCDC;">From:</label>
+                        <div class="filter-group">
                         
-                        <input type="date" id="startDate">
-                        <label for="startTime" class="input-label"></label>
-                        <input type="time" id="startTime">
+                            <input type="date" id="startDate">
+                            <label for="startTime" class="input-label"></label>
+                            <input type="time" id="startTime">
+                        </div>
                     </div>
-                    <label style="font-size: 500; color: #DCDCDC;">To:</label>
-                    <div class="filter-group">
+
+                    <div style="display:flex; flex-direction: row; align-items: center; gap: 5px; justify-content: space-between; width: 100%;">
+                        <label style="font-size: 500; color: #DCDCDC;">To:</label>
+                        <div class="filter-group">
                         
-                        <input type="date" id="endDate">
-                        <label for="endTime" class="input-label"></label>
-                        <input type="time" id="endTime">
+                            <input type="date" id="endDate">
+                            <label for="endTime" class="input-label"></label>
+                            <input type="time" id="endTime">
+                        </div>
                     </div>
+                    
                     
                 </div>
             </div>
@@ -403,8 +408,10 @@
 
             <div class="close-div">
                 <div class="title-modal">
-                    Information Details
-                    <img src="logo-2.png" alt="logo" width="70" height="auto">
+                    <div class="title">
+                        Information Details
+                    </div>
+                    <img src="logo-2.png" alt="logo" width="70" height="auto" class="logo">
                 </div>
                 <span class="close-modal" onclick="closeDetailsModal()">
                     <img src="delete.png" alt="Close" width="24">
@@ -424,7 +431,7 @@
                 </div>
                 
                 <div class="filter-group">
-                    <select id="addressFilter" onchange="filterDetails()">
+                    <select id="addressFilter" onchange="filterDetails()" class="Adr">
                         <option value="">All Addresses</option>
                     </select>
                 </div>
