@@ -1784,3 +1784,4 @@ function closeSafeReportModal() {
     if (tableHeader) tableHeader.innerHTML = "";
 }
 
+
