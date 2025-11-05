@@ -243,7 +243,8 @@ const notFoundIcon = L.icon({
 });
 
 
-const ws = new WebSocket('ws://localhost:8766');
+const ws = new WebSocket('wss://fisherlink-backend.onrender.com');
+
 let allStations = [];
 
 ws.onmessage = (event) => {
