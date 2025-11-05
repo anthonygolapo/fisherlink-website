@@ -537,17 +537,28 @@ async def fetch_sender_history(sender, start_date=None, end_date=None):
         for entry in data:
             entry["latitude"] = float(entry["latitude"])
             entry["longitude"] = float(entry["longitude"])
-            entry["time_received"] = entry["time_received"].strftime("%B %d, %Y, %I:%M %p")
+
+            # ✅ Safely handle both string and datetime types
+            time_val = entry["time_received"]
+            if isinstance(time_val, str):
+                try:
+                    time_obj = datetime.strptime(time_val, "%Y-%m-%d %H:%M:%S")
+                except ValueError:
+                    time_obj = datetime.fromisoformat(time_val.split('.')[0])
+            else:
+                time_obj = time_val
+
+            entry["time_received"] = time_obj.strftime("%B %d, %Y, %I:%M %p")
             entry["message"] = entry.get("message", "")
             entry["place"] = entry.get("place", "")
             entry["battery_percentage"] = entry.get("battery_percentage", None)
-
 
         return {"type": "history_result", "sender": sender, "history": data}
 
     except Exception as e:
         print(f"Database error: {e}")
         return {"type": "error", "message": "Failed to retrieve sender history"}
+
 
 
 
@@ -563,4 +574,5 @@ async def start_server():
 
 if __name__ == "__main__":
     asyncio.run(start_server())
+
 
