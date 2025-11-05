@@ -4,9 +4,6 @@ import pymysql
 import websockets
 from datetime import datetime, timedelta
 from decimal import Decimal
-
-
-
 import os
 from dotenv import load_dotenv
 
@@ -548,8 +545,9 @@ async def fetch_sender_history(sender, start_date=None, end_date=None):
 
 async def start_server():
     """Start WebSocket server"""
-    async with websockets.serve(handle_connection, "localhost", 8766):
-        print("WebSocket server started on ws://localhost:8766")
+    async with websockets.serve(handle_connection, "0.0.0.0", 8766):
+        print("✅ WebSocket server started on ws://0.0.0.0:8766")
+
         await broadcast_latest_updates()
 
 
