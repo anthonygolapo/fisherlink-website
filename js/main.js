@@ -243,7 +243,7 @@ const notFoundIcon = L.icon({
 });
 
 
-const ws = new WebSocket('wss://fisherlink-backend.onrender.com');
+const ws = new WebSocket('fisherlink-website-production.up.railway.app');
 
 let allStations = [];
 
