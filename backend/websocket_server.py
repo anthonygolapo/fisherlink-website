@@ -37,7 +37,6 @@ async def fetch_unique_senders_data():
                         p1.battery_percentage,
                         i.name, i.address, i.phone_number, i.boat_color, i.engine_type, i.boat_length
 
-
                 FROM aprs_packets p1
                 INNER JOIN (
                     SELECT sender, MAX(time_received) AS max_time
@@ -58,7 +57,19 @@ async def fetch_unique_senders_data():
         for entry in data:
             entry["latitude"] = float(entry["latitude"])
             entry["longitude"] = float(entry["longitude"])
-            last_time = entry["time_received"]
+
+            # ✅ Safely convert time_received to datetime if it’s a string
+            last_time_str = entry["time_received"]
+            if isinstance(last_time_str, str):
+                try:
+                    last_time = datetime.strptime(last_time_str, "%Y-%m-%d %H:%M:%S")
+                except ValueError:
+                    # fallback for other timestamp formats
+                    last_time = datetime.fromisoformat(last_time_str.split('.')[0])
+            else:
+                last_time = last_time_str
+
+            # ✅ Calculate time gap safely
             gap_minutes = (now - last_time).total_seconds() / 60
             entry["time_gap_minutes"] = gap_minutes
             entry["is_delayed"] = gap_minutes > 20
@@ -66,7 +77,6 @@ async def fetch_unique_senders_data():
             entry["message"] = entry.get("message", "")
             entry["place"] = entry.get("place", "")
             entry["battery_percentage"] = entry.get("battery_percentage", None)
-
 
         return {"type": "update", "stations": data, "count": unique_count}
 
@@ -553,3 +563,4 @@ async def start_server():
 
 if __name__ == "__main__":
     asyncio.run(start_server())
+
