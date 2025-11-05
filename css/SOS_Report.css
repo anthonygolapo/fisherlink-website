@@ -68,11 +68,7 @@
     border: none;
         color: rgb(164, 164, 164);
         max-height: 150px;
-        overflow-y: auto;
-       
-      
-     
-            
+        overflow-y: auto;           
 }
 
 .yearInput option {
@@ -98,8 +94,10 @@
 
 
 .ShowDetail-Btn{
+    display: flex;
     width: 160px;
 }
+
 
 
 
@@ -199,5 +197,36 @@
     /* Enable horizontal scrolling */
     /* Optional: Add a border for clarity */
     margin-top: 10px;
+}
+
+@media (max-width: 600px) {
+
+    
+.scrollable-safe-report {
+        max-height: 350px;
+        /* fixed height for scroll */
+        overflow-y: auto;
+        /* enables vertical scrolling */
+
+        /* optional for clarity */
+        margin-top: 130px;
+    }
+
+.div-box-sub-SOS{
+    display: flex;
+    flex-direction: column;
+}
+
+.yearInput {
+    width: 145px;
+   
+}
+
+.dropdown {
+    width: 145px;
+}
+
+
+    
 }
 

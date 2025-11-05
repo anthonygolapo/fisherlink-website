@@ -47,7 +47,7 @@ table {
     z-index: 1;
     /* Ensure it stays on top */
     padding: 10px;
-  
+   font-size: 14px;
     /* Optional border for header */
     text-align: center;
     /* ✅ Center text in header */

@@ -1,11 +1,10 @@
 
 #addressFilter {
-    font-size: 15px;
+    font-size: 13px;
     padding: 5px 12px;
     background: transparent;
     border: none;
     color: rgb(164, 164, 164);
-    max-height: 150px;
     overflow-y: auto;
 }
 
@@ -49,6 +48,7 @@
 
 /* Limit the visible height and allow scroll */
 .scrollable-details-table {
+    display: flex;
     max-height: 360px;
     /* adjust this height as needed */
     overflow-y: auto;
@@ -69,3 +69,22 @@
 
 
 
+
+@media (max-width: 600px) {
+
+.Address{
+    display: flex;
+    align-items: center;
+    height: 100px;
+}
+
+.count-div2 {
+    display: flex;
+    font-size: 18px;
+    font-weight: 600;
+  
+}
+
+
+
+}

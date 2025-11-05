@@ -2,12 +2,9 @@
 #sidebar {
     position: absolute;
     top: 93px;
-
     right: -350px;
     /* Sidebar starts off-screen */
-    width: 300px;
-   
-    
+    width: 300px;  
     /* 0.6 = 60% opacity */
     color: white;
     overflow-y: auto;
@@ -55,16 +52,7 @@
     /* Sidebar comes into view */
 }
 
-#sidebar .close-btn {
-    position: absolute;
-    top: 30px;
-    /* Adjust as needed */
-    right: 35px;
-    /* Pushes it to the right corner */
-    font-size: 24px;
-    color: white;
-    cursor: pointer;
-}
+
 
 #sidebar ul {
     list-style: none;
@@ -101,13 +89,7 @@
     background-color: #555;
 }
 
-#sidebar h3 {
-    font-size: 30px;
-    /* Adjust this size to make the word bigger or smaller */
-    font-weight: bold;
-    margin-bottom: 15px;
-    /* Optional: Adds space below the heading */
-}
+
 
 /* Highlight sender name */
 .highlight {
@@ -150,14 +132,16 @@
 
 .line-sidebar {
     display: flex;
-    width: 100%;
     height: 5px;
     background: #0f1d26;
         box-shadow:
             inset 0 3px 6px rgba(0, 0, 0, 0.5),
             0 2px 0 #313c43;
-    margin: 10px 0px;  
+    margin: 10px 0px; 
+    z-index: 1500;
 }
+
+
 
 
 
@@ -165,4 +149,63 @@
     width: 24px;
     /* adjust icon size */
     height: 24px;
+}
+
+
+@media (max-width: 600px) {
+
+    * {
+        box-sizing: border-box;
+    }
+
+    #sidebar {
+        position: absolute;
+        top: 68px;
+        right: -350px;
+        /* Sidebar starts off-screen */
+        width: 300px;
+        /* 0.6 = 60% opacity */
+        color: white;
+        overflow-y: auto;
+        transition: right 0.3s ease;
+    
+
+
+        /* Above map */
+    }
+
+    #sidebar-container {
+        display: flex;
+        flex-direction: column;
+        /* stack elements vertically */
+        justify-content: flex-start;
+        /* start content from the top */
+        background-color: #0f1e27;
+        gap: 10px;
+        height: 750px;
+        padding: 18px;
+        padding-top: 30px;
+
+    }
+    
+    .button-sidebar{
+        gap: 20px;
+    }
+
+    #senderList {
+        min-height: 350px;
+        max-height: 350px;
+        overflow-y: auto;
+        /* Enable vertical scrolling */
+        scrollbar-width: thin;
+        /* Optional: Makes scrollbar less intrusive */
+    }
+
+    .sidebar {
+        height: 40px;     
+    }
+
+    
+
+
 }

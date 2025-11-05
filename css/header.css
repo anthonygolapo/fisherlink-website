@@ -92,9 +92,18 @@
 
 
 .View-Btn{
+    display: flex;
     width: 200px;
     height: 100%;
+    font-size: 16px;
 }
+
+.View-Btn button{
+    display: flex;
+    font-size: 16px;
+}
+
+
 
 .btn-icon {
     display: none;
@@ -102,7 +111,6 @@
     width: 25px;
     height: 25px;
     cursor: pointer;
-    filter: brightness(0) invert(1);
     /* makes dark icons white */
 }
 
@@ -131,90 +139,80 @@
 
 
 @media (max-width: 600px) {
-    #controls {
-            flex-direction: column;
-            padding: 15px;
-            /* top/bottom =10px, left/right=4% */
-            box-sizing: border-box;
-            /* ensures padding fits inside width */
-        }
 
-    /* Hide logo/text */
-    .top-right-text {
-        display: none;
+    * {
+        box-sizing: border-box;
+    }
+
+    #map {
+        height: 100vh;
+        height: 100dvh;
+    }
+
+    #controls {
+        display: flex;
+        margin: 0;
+        padding: 14px 17px;
     }
 
     .search-container-main {
-        width: 100%;
-        margin-left: 0;
-        justify-content: center;
-        justify-content: space-between
-    }
-
-    .search-container-sub {
-        
+        display: flex;
         flex-direction: row;
-    
+        margin: 0;
+        gap: 20px;
     }
 
-    .search-input {
-        width: 100%;
+    .View-Btn {
+
+        display: flex;
+        align-items: center;
     }
 
-    .search-input input{
-        font-size: 10px;
+
+    .header {
+        display: flex;
+        width: 2000px;
+        margin: 0;
     }
-
-
 
     #viewAllFishermen {
         display: none;
     }
 
-    /* Show the icon instead */
+    .top-right-text {
+        display: none;
+    }
+
     .btn-icon {
         display: block;
 
-       
     }
 
-    /* Adjust the container for better alignment */
-    .View-Btn {
-        width: 50px;
-        height: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-       
-    }
+   
 
-}
-/* --- Medium screens (tablets 601px–1024px) --- */
-@media (min-width: 601px) and (max-width: 1024px) {
-    #controls {
-        flex-direction: column;
-        align-items: center;
-        gap: 15px;
-    }
+         
 
-    .top-right-text {
-        font-size: 30px;
-        margin: 0;
-    }
+         
+    
+         
 
-    .search-container-main {
-        width: 100%;
-        margin-left: 0;
-        justify-content: center;
-        gap: 10px;
-    }
+                 
 
-    .search-container-sub {
-        width: 100%;
-        justify-content: space-around;
-    }
+   
+
+
+
+    
+
+
+
+
+
 
     
 
 }
 
+
+
+    

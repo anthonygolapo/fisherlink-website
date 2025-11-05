@@ -15,7 +15,6 @@
 
 .modal-content {
     height: 90vh;
-    
     /* 70% of the viewport height */
     background: rgba(10, 20, 26, 0.6);
         /* semi-transparent background */
@@ -52,15 +51,55 @@
 .modal-content .close-div .close-modal {
     cursor: pointer;
     margin-right: 5px;
-    
-    
 }
 
 .title-modal {
     display: flex;
     font-family: sans-serif;
     color: #DCDCDC;
-    font-size: 50px;
+    font-size: clamp(35px, 5vw, 50px);
     gap: 20px;
     font-weight: 700;
+}
+
+
+
+@media (max-width: 600px) {
+
+
+  
+    
+    .modal-content {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        width: 100%;
+        padding: 20px;
+
+    }
+
+    .title-modal {
+        display: flex;
+        font-family: sans-serif;
+        color: #DCDCDC;
+        font-size: clamp(50px, 5vw, 50px);
+        font-weight: 700;
+        align-items: center;
+        gap: 1px;
+        width: 100%;
+      
+      
+    }
+
+    .logo{
+        width: 90px;
+        height: auto;  
+    }
+
+    .title{
+        font-size: 34px;
+        width: 210px;
+    }
+
+    
 }

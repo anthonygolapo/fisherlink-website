@@ -3,12 +3,11 @@
 .Clear-Btn{
     display: flex;
     width: 100px;
-    height: 44px;
 }
 
 .Plot-Btn{
+    display: flex;
     width: 100px;
-    height: 44px;
 }
 
 
@@ -69,3 +68,14 @@
 }
 
 
+@media (max-width: 600px) {
+
+#searchResults {
+        min-height: 460px;
+        max-height: 460px;
+    }
+
+#searchResultsWrapper {
+    padding-top: 110px;
+}
+}
