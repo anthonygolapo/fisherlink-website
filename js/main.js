@@ -243,7 +243,7 @@ const notFoundIcon = L.icon({
 });
 
 
-const ws = new WebSocket('fisherlink-website-production.up.railway.app');
+const ws = new WebSocket(CONFIG.WS_URL);
 
 
 
@@ -1783,5 +1783,6 @@ function closeSafeReportModal() {
     if (tableBody) tableBody.innerHTML = "";
     if (tableHeader) tableHeader.innerHTML = "";
 }
+
 
 
