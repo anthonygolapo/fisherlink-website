@@ -28,31 +28,28 @@ def json_serializer(obj):
     raise TypeError(f"Type {obj.__class__.__name__} not serializable")
 
 async def fetch_unique_senders_data():
-    """Fetch latest data for each unique sender (optimized for online use)"""
+    """Fetch latest data for each unique sender that exists in the information table"""
     try:
         connection = pymysql.connect(**DB_CONFIG, cursorclass=pymysql.cursors.DictCursor)
         with connection.cursor() as cursor:
-            # ✅ Limit to last 24 hours and include fisherman info
             cursor.execute("""
                 SELECT p1.sender, p1.latitude, p1.longitude, p1.time_received, p1.message, p1.place,
-                       p1.battery_percentage, p1.status,
-                       i.name, i.address, i.phone_number, i.boat_color, i.engine_type, i.boat_length
+                        p1.battery_percentage,
+                        i.name, i.address, i.phone_number, i.boat_color, i.engine_type, i.boat_length
+
                 FROM aprs_packets p1
                 INNER JOIN (
                     SELECT sender, MAX(time_received) AS max_time
                     FROM aprs_packets
-                    WHERE time_received >= NOW() - INTERVAL 1 DAY
                     GROUP BY sender
                 ) p2 ON p1.sender = p2.sender AND p1.time_received = p2.max_time
-                LEFT JOIN information i ON p1.sender = i.callsign
-                ORDER BY p1.time_received DESC
-                LIMIT 100;
+                INNER JOIN information i ON p1.sender = i.callsign  -- ✅ Compare sender vs callsign
             """)
+
             data = cursor.fetchall()
 
         connection.close()
 
-        # ✅ Process and clean results
         unique_senders = set(entry["sender"] for entry in data)
         unique_count = len(unique_senders)
         now = datetime.now()
@@ -61,23 +58,22 @@ async def fetch_unique_senders_data():
             entry["latitude"] = float(entry["latitude"])
             entry["longitude"] = float(entry["longitude"])
 
-            # ✅ Safely convert to datetime
+            # ✅ Safely convert time_received to datetime if it’s a string
             last_time_str = entry["time_received"]
             if isinstance(last_time_str, str):
                 try:
                     last_time = datetime.strptime(last_time_str, "%Y-%m-%d %H:%M:%S")
                 except ValueError:
+                    # fallback for other timestamp formats
                     last_time = datetime.fromisoformat(last_time_str.split('.')[0])
             else:
                 last_time = last_time_str
 
-            # ✅ Time gap in minutes
+            # ✅ Calculate time gap safely
             gap_minutes = (now - last_time).total_seconds() / 60
             entry["time_gap_minutes"] = gap_minutes
             entry["is_delayed"] = gap_minutes > 20
             entry["time_received"] = last_time.strftime("%B %d, %Y, %I:%M %p")
-
-            # ✅ Defaults to avoid missing values
             entry["message"] = entry.get("message", "")
             entry["place"] = entry.get("place", "")
             entry["battery_percentage"] = entry.get("battery_percentage", None)
@@ -85,9 +81,8 @@ async def fetch_unique_senders_data():
         return {"type": "update", "stations": data, "count": unique_count}
 
     except Exception as e:
-        print(f"⚠️ Database error in fetch_unique_senders_data: {e}")
+        print(f"Database error: {e}")
         return {"type": "error", "message": "Database connection failed"}
-
 
 
 
