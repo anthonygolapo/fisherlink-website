@@ -313,11 +313,6 @@ function updateMap(stations) {
 
 
          // Check if the message contains "SOS"
-        if (message.includes("SOS")) {
-            showSOSAlert(sender); // Call function to show alert
-        }
-
-
         // If the sender has ever sent an SOS, it remains marked red
         if (message.includes("SOS")) {
             sosStatus[sender] = true;
@@ -326,6 +321,13 @@ function updateMap(stations) {
         // If "Help on the Way" is marked, it stays green
         if (helpStatus[sender]) {
             sosStatus[sender] = false; // Override SOS if Help on the Way is clicked
+        }
+
+        // ✅ Reset statuses if the sender is marked as safe
+        if (station.status === "safe" || message === "SAFE") {
+            sosStatus[sender] = false;
+            helpStatus[sender] = false;
+            notFoundStatus[sender] = false;
         }
 
         // If "Not Found" is clicked, it turns gray UNLESS an SOS is detected
@@ -338,6 +340,7 @@ function updateMap(stations) {
         } else {
             icon = defaultIcon; // Default Blue marker
         }
+
 
 
         // ✅ Boat marker logic
@@ -1783,6 +1786,5 @@ function closeSafeReportModal() {
     if (tableBody) tableBody.innerHTML = "";
     if (tableHeader) tableHeader.innerHTML = "";
 }
-
 
 
