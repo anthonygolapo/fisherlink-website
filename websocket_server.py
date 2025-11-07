@@ -10,12 +10,14 @@ from dotenv import load_dotenv
 load_dotenv()  # Load .env file
 
 DB_CONFIG = {
-    "host": os.getenv("DB_HOST"),
-    "user": os.getenv("DB_USER"),
-    "password": os.getenv("DB_PASS"),
-    "database": os.getenv("DB_NAME"),
-    "port": int(os.getenv("DB_PORT"))
+    "host": os.getenv("DB_HOST", "localhost"),
+    "user": os.getenv("DB_USER", "root"),
+    "password": os.getenv("DB_PASS", ""),
+    "database": os.getenv("DB_NAME", "aprs_db"),
+    "port": int(os.getenv("DB_PORT", 3306)),
+    "ssl": {"ssl": {}}  # ✅ enables secure connection for Railway public host
 }
+
 
 connected_clients = set()
 
@@ -611,4 +613,5 @@ async def start_server():
 if __name__ == "__main__":
 
     asyncio.run(start_server())
+
 
