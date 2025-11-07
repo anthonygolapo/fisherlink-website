@@ -124,30 +124,16 @@ async def fetch_sender_trail(sender):
 
 
 
-# ✅ Optimized broadcast: only updates when database changes
 async def broadcast_latest_updates():
-    last_count = 0
+    """Fetch and broadcast updates to all clients"""
     while True:
-        try:
-            connection = pymysql.connect(**DB_CONFIG, cursorclass=pymysql.cursors.DictCursor)
-            with connection.cursor() as cursor:
-                cursor.execute("SELECT COUNT(*) AS cnt FROM aprs_packets")
-                current_count = cursor.fetchone()["cnt"]
+        data = await fetch_unique_senders_data()
+        message = json.dumps(data)
 
-            # Only broadcast if new packets exist
-            if current_count != last_count:
-                update_data = await fetch_unique_senders_data()
-                message = json.dumps(update_data)
-                if connected_clients:
-                    await asyncio.gather(*[client.send(message) for client in connected_clients])
-                last_count = current_count
+        if connected_clients:
+            await asyncio.gather(*[client.send(message) for client in connected_clients])
 
-            connection.close()
-        except Exception as e:
-            print("⚠️ broadcast_latest_updates error:", e)
-
-        await asyncio.sleep(3)  # Check every 3 seconds
-
+        await asyncio.sleep(1)  # Update every 1 second
 
 
 async def mark_sender_safe(sender):
