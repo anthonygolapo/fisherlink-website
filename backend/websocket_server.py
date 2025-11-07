@@ -285,23 +285,29 @@ async def handle_connection(websocket):
                 success = await mark_sender_safe(data["sender"])
                 if success:
                     update_data = await fetch_unique_senders_data()
-                    await websocket.send(json.dumps(update_data))
+                    # ✅ Broadcast to all clients, not just the sender
+                    if connected_clients:
+                        await asyncio.gather(*[client.send(json.dumps(update_data)) for client in connected_clients])
                 else:
                     await websocket.send(json.dumps({
                         "type": "error",
                         "message": "Failed to mark sender as safe"
                     }))
 
+
             elif data["type"] == "help_on_way":  # Mark sender for help
                 success = await mark_sender_help(data["sender"])
                 if success:
                     update_data = await fetch_unique_senders_data()
-                    await websocket.send(json.dumps(update_data))
+                    # ✅ Broadcast to all connected clients
+                    if connected_clients:
+                        await asyncio.gather(*[client.send(json.dumps(update_data)) for client in connected_clients])
                 else:
                     await websocket.send(json.dumps({
                         "type": "error",
                         "message": "Failed to update sender status"
                     }))
+
 
             elif data["type"] == "fetch_history":  # Fetch sender history
                 sender = data["sender"]
@@ -321,12 +327,15 @@ async def handle_connection(websocket):
                 success = await mark_sender_not_found(data["sender"])
                 if success:
                     update_data = await fetch_unique_senders_data()
-                    await websocket.send(json.dumps(update_data))
+                    # ✅ Broadcast to all clients
+                    if connected_clients:
+                        await asyncio.gather(*[client.send(json.dumps(update_data)) for client in connected_clients])
                 else:
                     await websocket.send(json.dumps({
                         "type": "error",
                         "message": "Failed to mark sender as Not Found"
                     }))
+
 
             elif data["type"] == "sender_report":  # Fetch Sender Report
                 await fetch_sender_report(websocket)
@@ -375,6 +384,8 @@ async def fetch_safe_report(websocket):
     try:
         connection = pymysql.connect(**DB_CONFIG, cursorclass=pymysql.cursors.DictCursor)
         with connection.cursor() as cursor:
+            cursor.execute("SET time_zone = '+08:00'")  # ✅ Force Philippine time zone
+
             cursor.execute("""
                 SELECT 
                     DATE_FORMAT(t.time_received, '%M-%Y') AS month,
@@ -424,6 +435,8 @@ async def fetch_sender_report(websocket):
     try:
         connection = pymysql.connect(**DB_CONFIG, cursorclass=pymysql.cursors.DictCursor)
         with connection.cursor() as cursor:
+            cursor.execute("SET time_zone = '+08:00'")  # ✅ Fix for UTC mismatch
+
             cursor.execute("""
                 SELECT 
                     DATE_FORMAT(t.time_received, '%M-%Y') AS month,
@@ -479,6 +492,8 @@ async def fetch_sender_details(sender, month):
     try:
         connection = pymysql.connect(**DB_CONFIG, cursorclass=pymysql.cursors.DictCursor)
         with connection.cursor() as cursor:
+            cursor.execute("SET time_zone = '+08:00'")  # ✅ Ensure Manila time zone for month filter
+
             cursor.execute("""
                 SELECT time_received, message
                 FROM aprs_packets
@@ -508,6 +523,8 @@ async def fetch_sender_history(sender, start_date=None, end_date=None):
     try:
         connection = pymysql.connect(**DB_CONFIG, cursorclass=pymysql.cursors.DictCursor)
         with connection.cursor() as cursor:
+            cursor.execute("SET time_zone = '+08:00'")
+
             sql_query = """
                 SELECT p.sender, p.latitude, p.longitude, p.time_received, p.message, p.place,
                 p.battery_percentage,
@@ -574,5 +591,4 @@ async def start_server():
 
 if __name__ == "__main__":
     asyncio.run(start_server())
-
 
