@@ -35,7 +35,7 @@ async def fetch_unique_senders_data():
             # ✅ Limit to last 24 hours and include fisherman info
             cursor.execute("""
                 SELECT p1.sender, p1.latitude, p1.longitude, p1.time_received, p1.message, p1.place,
-                       p1.battery_percentage, p1.status,
+                       p1.battery_percentage,
                        i.name, i.address, i.phone_number, i.boat_color, i.engine_type, i.boat_length
                 FROM aprs_packets p1
                 INNER JOIN (
@@ -609,4 +609,5 @@ async def start_server():
 
 
 if __name__ == "__main__":
+
     asyncio.run(start_server())
