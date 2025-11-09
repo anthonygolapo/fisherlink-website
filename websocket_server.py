@@ -49,10 +49,11 @@ async def fetch_unique_senders_data():
                     WHERE time_received >= NOW() - INTERVAL 1 DAY
                     GROUP BY sender
                 ) p2 ON p1.sender = p2.sender AND p1.time_received = p2.max_time
-                LEFT JOIN information i ON p1.sender = i.callsign
+                INNER JOIN information i ON p1.sender = i.callsign  -- ✅ only verified senders
                 ORDER BY p1.time_received DESC
                 LIMIT 100;
             """)
+
             data = cursor.fetchall()
 
             # ✅ Update SOS/help/safe/not found status for each sender
@@ -623,3 +624,4 @@ async def start_server():
 
 if __name__ == "__main__":
     asyncio.run(start_server())
+
