@@ -1,4 +1,4 @@
-    function showAllInfo() {
+function showAllInfo() {
     const tableBody = document.querySelector("#infoTable tbody");
     tableBody.innerHTML = ""; // Clear previous content
 
@@ -208,9 +208,7 @@ const boatIcons = {
 const markers = {};
 const trails = {};
 const trailLines = {}; // Store polyline layers
-const sosStatus = {};  // Stores if a sender had SOS
-const helpStatus = {}; // Stores if a sender was marked as Help on the Way
-const notFoundStatus = {}; // Track Not Found state
+
 
 const defaultIcon = L.icon({
     iconUrl: 'mark-blue.png',
@@ -292,56 +290,55 @@ ws.onmessage = (event) => {
 
 
 
-function updateMap(stations) {
+function updateMap(stations) { 
     stations.forEach(station => {
         const lat = parseFloat(station.latitude);
         const lng = parseFloat(station.longitude);
         const sender = station.sender;
         const message = station.message || "";
-        // Determine the boat color based on place
         const place = (station.place || "Unknown").trim();
         const boatIcon = boatIcons[place] || boatIcons["Unknown"];
 
-        // Create boat marker just below the main marker (slightly offset)
-        const boatLat = lat +0.00005;  // Small offset downward
-        const boatLng = lng ;
+        const boatLat = lat + 0.00005;
+        const boatLng = lng;
         const boatMarkerKey = `${sender}_boat`;
 
+        // Statuses directly from database
+        const sosActive = station.sos_status === 1;
+        const helpActive = station.help_status === 1;
+        const notFoundActive = station.not_found_status === 1;
 
-         // Check if the message contains "SOS"
-        // ✅ Color logic should depend on the message text from the server
-        const msg = (message || "").toLowerCase();
-
-        let icon;
-        if (msg.includes("sos")) {
-            icon = sosIcon;  // Red
-        } else if (msg.includes("help")) {
-            icon = helpIcon; // Green
-        } else if (msg.includes("safe")) {
-            icon = defaultIcon; // Blue/default
-        } else if (msg.includes("not found")) {
-            icon = notFoundIcon; // Gray
-        } else {
-            icon = defaultIcon; // Default
+        // Check if message contains SOS
+        if (message.toLowerCase().includes("sos")) {
+            showSOSAlert(sender);
         }
 
 
+        // Determine main marker icon based on database status
+        let icon;
+        if (notFoundActive && !sosActive) {
+            icon = notFoundIcon;
+        } else if (sosActive) {
+            icon = sosIcon;
+        } else if (helpActive) {
+            icon = helpIcon;
+        } else {
+            icon = defaultIcon;
+        }
 
-        // ✅ Boat marker logic
+        // Boat marker logic
         if (markers[boatMarkerKey]) {
             markers[boatMarkerKey].setLatLng([boatLat, boatLng]).setIcon(boatIcon);
         } else {
-            // ✅ Create boat marker that overlaps and stays above main marker
             markers[boatMarkerKey] = L.marker([boatLat, boatLng], {
                 icon: boatIcon,
-                zIndexOffset: 1000 // ensures the boat stays above main marker
+                zIndexOffset: 1000
             })
             .bindPopup(`<strong>${sender}</strong><br>Place: ${place}`)
             .addTo(map);
         }
 
-
-        // ✅ Main marker logic (existing)
+        // Main marker logic
         const markerKey = `${sender}_main`;
         if (markers[markerKey]) {
             markers[markerKey].setLatLng([lat, lng]).setIcon(icon);
@@ -351,26 +348,22 @@ function updateMap(stations) {
                 .addTo(map);
         }
 
-        let displayMessage = message === "Not Found in Database" ? "Not Found" : message;
-
-        // Define Popup Content
+        // Popup content
+        const displayMessage = message === "Not Found in Database" ? "Not Found" : message;
         const popupContent = `
         <div class="station-popup">
-        <h3>${sender}</h3>
-        <p><strong>Last Update:</strong> ${station.time_received}</p>
-        <p><strong>Latitude:</strong> ${lat.toFixed(6)}</p>
-        <p><strong>Longitude:</strong> ${lng.toFixed(6)}</p>
-        <p><strong>Message:</strong> <span class="message-text">${message}</span></p>
-        ${station.battery_percentage !== null ? `<p><strong>Battery:</strong> ${station.battery_percentage}%</p>` : ''}
+            <h3>${sender}</h3>
+            <p><strong>Last Update:</strong> ${station.time_received}</p>
+            <p><strong>Latitude:</strong> ${lat.toFixed(6)}</p>
+            <p><strong>Longitude:</strong> ${lng.toFixed(6)}</p>
+            <p><strong>Message:</strong> <span class="message-text">${message}</span></p>
+            ${station.battery_percentage !== null ? `<p><strong>Battery:</strong> ${station.battery_percentage}%</p>` : ''}
 
-
-        ${sosStatus[sender] && !helpStatus[sender] ? `<button class="popup-btn help-btn" onclick="markHelpOnWay('${sender}')">🚑 Help on the Way</button>` : ''}
-        ${(sosStatus[sender] || helpStatus[sender] || notFoundStatus[sender]) ? `<button class="popup-btn safe-btn" onclick="markAsSafe('${sender}')">✅ Mark as Safe</button>` : ''}
-        <!-- Only show Not Found button if Help on the Way is active -->
-        ${helpStatus[sender] && !notFoundStatus[sender] ? `<button class="popup-btn notfound-btn" onclick="markNotFound('${sender}')">❌ Not Found</button>` : ''}
-    </div>
-`;
-
+            ${sosActive && !helpActive ? `<button class="popup-btn help-btn" onclick="markHelpOnWay('${sender}')">🚑 Help on the Way</button>` : ''}
+            ${(sosActive || helpActive || notFoundActive) ? `<button class="popup-btn safe-btn" onclick="markAsSafe('${sender}')">✅ Mark as Safe</button>` : ''}
+            ${helpActive && !notFoundActive ? `<button class="popup-btn notfound-btn" onclick="markNotFound('${sender}')">❌ Not Found</button>` : ''}
+        </div>
+        `;
 
         if (!markers[sender]) {
             markers[sender] = L.marker([lat, lng], { icon, title: sender })
@@ -384,11 +377,10 @@ function updateMap(stations) {
         }
 
         trails[sender].push([lat, lng]);
-        if (trails[sender].length > 20) {
-            trails[sender].shift();
-        }
+        if (trails[sender].length > 20) trails[sender].shift();
     });
 }
+
 
 
 // **Function to Mark Help on the Way**
