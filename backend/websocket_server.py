@@ -40,7 +40,8 @@ async def fetch_unique_senders_data():
                 SELECT p1.sender, p1.latitude, p1.longitude, p1.time_received,
                        p1.message, p1.place, p1.battery_percentage,
                        i.name, i.address, i.phone_number, 
-                       i.boat_color, i.engine_type, i.boat_length
+                       i.boat_color, i.engine_type, i.boat_length,
+                       i.sos_status, i.help_status, i.not_found_status
                 FROM aprs_packets p1
                 INNER JOIN (
                     SELECT sender, MAX(time_received) AS max_time
@@ -54,18 +55,57 @@ async def fetch_unique_senders_data():
             """)
             data = cursor.fetchall()
 
+            # ✅ Update SOS/help/safe/not found status for each sender
+            for entry in data:
+                msg = entry.get("message", "").lower()
+                sender = entry["sender"]
+
+                # 🔍 Check if Help on the Way is currently active
+                cursor.execute("SELECT help_status FROM information WHERE callsign = %s", (sender,))
+                current_status = cursor.fetchone()
+                help_on_way_active = current_status and current_status["help_status"] == 1
+
+                if "sos" in msg:
+                    # 🟢 If Help on the Way is active, keep it — ignore SOS packets
+                    if not help_on_way_active:
+                        cursor.execute("""
+                            UPDATE information
+                            SET sos_status = 1, help_status = 0, not_found_status = 0
+                            WHERE callsign = %s
+                        """, (sender,))
+                elif "help" in msg:
+                    cursor.execute("""
+                        UPDATE information
+                        SET sos_status = 0, help_status = 1, not_found_status = 0
+                        WHERE callsign = %s
+                    """, (sender,))
+                elif "safe" in msg:
+                    cursor.execute("""
+                        UPDATE information
+                        SET sos_status = 0, help_status = 0, not_found_status = 0
+                        WHERE callsign = %s
+                    """, (sender,))
+                elif "not found" in msg:
+                    cursor.execute("""
+                        UPDATE information
+                        SET sos_status = 0, help_status = 0, not_found_status = 1
+                        WHERE callsign = %s
+                    """, (sender,))
+
+            connection.commit()
+
         connection.close()
 
-        # ✅ Process data
+        # ✅ Format the data for frontend
         unique_senders = set(entry["sender"] for entry in data)
         unique_count = len(unique_senders)
-        now = datetime.now()  # local PH time due to +08:00 above
+        now = datetime.now()
 
         for entry in data:
             entry["latitude"] = float(entry["latitude"])
             entry["longitude"] = float(entry["longitude"])
 
-            # ---- Convert and format time ----
+            # Convert and format time
             t_str = entry["time_received"]
             if isinstance(t_str, str):
                 try:
@@ -78,11 +118,6 @@ async def fetch_unique_senders_data():
             entry["time_gap_minutes"] = (now - t_obj).total_seconds() / 60
             entry["is_delayed"] = entry["time_gap_minutes"] > 20
             entry["time_received"] = t_obj.strftime("%B %d, %Y, %I:%M %p")
-
-            # ✅ Safe defaults
-            entry["message"] = entry.get("message", "")
-            entry["place"] = entry.get("place", "")
-            entry["battery_percentage"] = entry.get("battery_percentage", None)
 
         return {"type": "update", "stations": data, "count": unique_count}
 
@@ -158,104 +193,86 @@ async def broadcast_latest_updates():
 
 
 async def mark_sender_safe(sender):
-    """Insert a new 'Marked as Safe' record only if sender is registered."""
+    """Mark sender as Safe and reset all statuses."""
     try:
         connection = pymysql.connect(**DB_CONFIG, cursorclass=pymysql.cursors.DictCursor)
         with connection.cursor() as cursor:
-            # ✅ Verify if sender exists in information table
             cursor.execute("SELECT callsign FROM information WHERE callsign = %s", (sender,))
             if not cursor.fetchone():
                 print(f"❌ Sender '{sender}' not found in information table.")
                 return False
 
-            # ✅ Get the latest APRS record for this sender
-            cursor.execute("""
-                SELECT sender, latitude, longitude, place
-                FROM aprs_packets
-                WHERE sender = %s
-                ORDER BY time_received DESC
-                LIMIT 1
-            """, (sender,))
-            latest = cursor.fetchone()
-
-            if not latest:
-                print(f"No previous record found for sender {sender}")
-                return False
-
-            # ✅ Insert new record with updated message
+            # Insert "Marked as Safe" record
             cursor.execute("""
                 INSERT INTO aprs_packets (sender, latitude, longitude, time_received, message, place)
-                VALUES (%s, %s, %s, NOW(), 'Marked as Safe', %s)
-            """, (latest["sender"], latest["latitude"], latest["longitude"], latest["place"]))
+                SELECT sender, latitude, longitude, NOW(), 'Marked as Safe', place
+                FROM aprs_packets WHERE sender = %s
+                ORDER BY time_received DESC LIMIT 1
+            """, (sender,))
 
+            # Reset all statuses to 0
+            cursor.execute("""
+                UPDATE information
+                SET sos_status = 0, help_status = 0, not_found_status = 0
+                WHERE callsign = %s
+            """, (sender,))
             connection.commit()
-            print(f"✅ Sender '{sender}' marked as safe.")
+            print(f"✅ Sender '{sender}' marked as Safe.")
             return True
 
     except Exception as e:
-        print(f"Database error during mark_safe: {e}")
+        print(f"Database error during mark_sender_safe: {e}")
         return False
     finally:
-        if connection:
-            connection.close()
+        connection.close()
+
 
 
 
 async def mark_sender_help(sender):
-    """Insert a new 'Help on the Way' record only if sender is registered."""
+    """Mark sender as Help on the Way."""
     try:
         connection = pymysql.connect(**DB_CONFIG, cursorclass=pymysql.cursors.DictCursor)
         with connection.cursor() as cursor:
-            # ✅ Verify if sender exists in information table
             cursor.execute("SELECT callsign FROM information WHERE callsign = %s", (sender,))
             if not cursor.fetchone():
                 print(f"❌ Sender '{sender}' not found in information table.")
                 return False
 
-            # ✅ Get the latest APRS record for this sender
-            cursor.execute("""
-                SELECT sender, latitude, longitude, place
-                FROM aprs_packets
-                WHERE sender = %s
-                ORDER BY time_received DESC
-                LIMIT 1
-            """, (sender,))
-            latest = cursor.fetchone()
-
-            if not latest:
-                print(f"No previous record found for sender {sender}")
-                return False
-
-            # ✅ Insert a new row with updated message
             cursor.execute("""
                 INSERT INTO aprs_packets (sender, latitude, longitude, time_received, message, place)
-                VALUES (%s, %s, %s, NOW(), 'Help on the Way', %s)
-            """, (latest["sender"], latest["latitude"], latest["longitude"], latest["place"]))
+                SELECT sender, latitude, longitude, NOW(), 'Help on the Way', place
+                FROM aprs_packets WHERE sender = %s
+                ORDER BY time_received DESC LIMIT 1
+            """, (sender,))
 
+            cursor.execute("""
+                UPDATE information
+                SET sos_status = 0, help_status = 1, not_found_status = 0
+                WHERE callsign = %s
+            """, (sender,))
             connection.commit()
             print(f"✅ Help on the Way message added for '{sender}'.")
             return True
 
     except Exception as e:
-        print(f"Database error during mark_help_on_way: {e}")
+        print(f"Database error during mark_sender_help: {e}")
         return False
     finally:
-        if connection:
-            connection.close()
+        connection.close()
+
 
 
 async def mark_sender_not_found(sender):
-    """Mark sender as 'Not Found' only if registered."""
+    """Mark sender as Not Found."""
     try:
         connection = pymysql.connect(**DB_CONFIG, cursorclass=pymysql.cursors.DictCursor)
         with connection.cursor() as cursor:
-            # ✅ Verify if sender exists in information table
             cursor.execute("SELECT callsign FROM information WHERE callsign = %s", (sender,))
             if not cursor.fetchone():
                 print(f"❌ Sender '{sender}' not found in information table.")
                 return False
 
-            # ✅ Update only the latest APRS record for this sender
             cursor.execute("""
                 UPDATE aprs_packets
                 SET message = 'Not Found'
@@ -268,21 +285,22 @@ async def mark_sender_not_found(sender):
                     ) AS subquery
                 )
             """, (sender,))
-            connection.commit()
 
-            if cursor.rowcount > 0:
-                print(f"⚠️ Sender '{sender}' marked as Not Found.")
-                return True
-            else:
-                print(f"No record found to mark as Not Found for sender '{sender}'.")
-                return False
+            cursor.execute("""
+                UPDATE information
+                SET not_found_status = 1, sos_status = 0, help_status = 0
+                WHERE callsign = %s
+            """, (sender,))
+            connection.commit()
+            print(f"⚠️ Sender '{sender}' marked as Not Found.")
+            return True
 
     except Exception as e:
-        print(f"Database error during mark_not_found: {e}")
+        print(f"Database error during mark_sender_not_found: {e}")
         return False
     finally:
-        if connection:
-            connection.close()
+        connection.close()
+
 
 
 
@@ -612,4 +630,5 @@ async def start_server():
 
 if __name__ == "__main__":
     asyncio.run(start_server())
+
 
