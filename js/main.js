@@ -273,24 +273,15 @@ ws.onmessage = (event) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function updateMap(stations) { 
+    // 🟢 Step 1: Sync SOS alerts globally (before looping)
+    const activeSenders = new Set(stations.map(s => s.sender));
+    for (const sender in sosAlerts) {
+        if (!activeSenders.has(sender)) {
+            removeSOSAlert(sender); // Remove alerts for senders no longer active
+        }
+    }
+
     stations.forEach(station => {
         const lat = parseFloat(station.latitude);
         const lng = parseFloat(station.longitude);
@@ -303,18 +294,31 @@ function updateMap(stations) {
         const boatLng = lng;
         const boatMarkerKey = `${sender}_boat`;
 
-        // Statuses directly from database
+        // 🟡 Step 2: Sync SOS/Help/Not Found alerts with database
         const sosActive = station.sos_status === 1;
         const helpActive = station.help_status === 1;
         const notFoundActive = station.not_found_status === 1;
 
-        // Check if message contains SOS
-        if (message.toLowerCase().includes("sos")) {
-            showSOSAlert(sender);
+        if (sosActive && !helpActive) {
+            if (!sosAlerts[sender]) showSOSAlert(sender);
+            sosAlerts[sender].style.background = "#8b0000";
+            sosAlerts[sender].innerHTML = `🚨 <strong>SOS:</strong> ${sender}`;
+        } 
+        else if (helpActive) {
+            if (!sosAlerts[sender]) showSOSAlert(sender);
+            sosAlerts[sender].style.background = "#28a745";
+            sosAlerts[sender].innerHTML = `✅ <strong>Help on the Way:</strong> ${sender}`;
+        } 
+        else if (notFoundActive) {
+            if (!sosAlerts[sender]) showSOSAlert(sender);
+            sosAlerts[sender].style.background = "#555";
+            sosAlerts[sender].innerHTML = `⚠️ <strong>Not Found:</strong> ${sender}`;
+        } 
+        else {
+            removeSOSAlert(sender); // Safe or cleared
         }
 
-
-        // Determine main marker icon based on database status
+        // 🧭 Step 3: Choose marker icon based on status
         let icon;
         if (notFoundActive && !sosActive) {
             icon = notFoundIcon;
@@ -326,7 +330,7 @@ function updateMap(stations) {
             icon = defaultIcon;
         }
 
-        // Boat marker logic
+        // 🛥️ Step 4: Update or create boat marker
         if (markers[boatMarkerKey]) {
             markers[boatMarkerKey].setLatLng([boatLat, boatLng]).setIcon(boatIcon);
         } else {
@@ -338,7 +342,7 @@ function updateMap(stations) {
             .addTo(map);
         }
 
-        // Main marker logic
+        // 📍 Step 5: Main marker logic
         const markerKey = `${sender}_main`;
         if (markers[markerKey]) {
             markers[markerKey].setLatLng([lat, lng]).setIcon(icon);
@@ -348,8 +352,7 @@ function updateMap(stations) {
                 .addTo(map);
         }
 
-        // Popup content
-        const displayMessage = message === "Not Found in Database" ? "Not Found" : message;
+        // 📝 Step 6: Popup with action buttons
         const popupContent = `
         <div class="station-popup">
             <h3>${sender}</h3>
@@ -376,10 +379,14 @@ function updateMap(stations) {
                 .setIcon(icon);
         }
 
+        // 🧵 Step 7: Update trail
         trails[sender].push([lat, lng]);
         if (trails[sender].length > 20) trails[sender].shift();
     });
 }
+
+
+
 
 
 
@@ -1762,3 +1769,4 @@ function closeSafeReportModal() {
     if (tableBody) tableBody.innerHTML = "";
     if (tableHeader) tableHeader.innerHTML = "";
 }
+
