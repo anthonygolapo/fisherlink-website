@@ -78,4 +78,8 @@
 #searchResultsWrapper {
     padding-top: 110px;
 }
+
+#historyMap{
+    height: 460px;
+}
 }
